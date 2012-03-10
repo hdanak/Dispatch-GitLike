@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use File::Basename;
+use Env '@PATH';
 
 my $default = 'help';  # set this to the command to run if one isn't provided
 my $fallback = 'git';  # set this to your program's actual name
@@ -33,7 +34,27 @@ if (exists $alias{$command}) {
         $exec_cmd = "$alias{$command} @ARGV"
     }
 } else {
-    $exec_cmd = "$prefix/$0-$command @ARGV"
+    $exec_cmd = find_best_exec("$0-$command", $prefix) . " @ARGV"
 }
 
+print $exec_cmd;
 exec $exec_cmd;
+
+# find the best exec candidate, even with a file extension
+sub find_best_exec {
+    my ($filename, $prefix) = @_;
+    my $found;
+    for ($prefix, @PATH) {
+        $found = best_file_in_dir($filename, $_);
+        last if $found;
+    }
+    return $found if $found;
+    return $filename;
+}
+sub best_file_in_dir {
+    my ($filename, $dir) = @_;
+    opendir(my $dh, $dir) or return;
+    my @files = sort grep {/^$filename\.?/} readdir $dh;
+    closedir $dh;
+    return "$dir/$files[0]" if @files;
+}
