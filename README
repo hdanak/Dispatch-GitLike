@@ -1,0 +1,2 @@
+- dispatch.pl: Modify script to your liking, then rename it to whatever you want. Or don't modify it, and symlink the script to a name of your choosing.
+- dispatch.c: See header file for usage and configuration documentation.
