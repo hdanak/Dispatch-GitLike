@@ -1,3 +1,4 @@
 dispatch.pl::
-    Modify script to your liking, then rename it to whatever you want. Or
-    don't modify it, and symlink the script to a name of your choosing.
+    Modify script to your liking, then rename it to whatever you want.
+    Or don't modify it, and symlink the script to a name of your choosing.
+    If your script is called "dispatch", then you can call any executable "dispatch-<verb>" as "dispatch verb".
