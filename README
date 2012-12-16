@@ -1,4 +1,3 @@
-dispatch.pl::
-    Modify script to your liking, then rename it to whatever you want.
-    Or don't modify it, and symlink the script to a name of your choosing.
-    If your script is called "dispatch", then you can call any executable "dispatch-<verb>" as "dispatch verb".
+multi-exec::
+    Rename or symlink script to your command's base name (e.g. git), and optionally add aliases or modify the search path.
+    For example, if you rename it to "dispatch", then you can call any executable "dispatch-<verb>" as "dispatch verb".
