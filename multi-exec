@@ -1,16 +1,13 @@
 #!/usr/bin/env perl
-use strict;
-use warnings;
+use Modern::Perl;
 use File::Basename;
 
 my $def_cmd= 'help';
-local $0 = ($0 and $0 ne '-') ? basename($0)
+my $base = ($0 and $0 ne '-') ? basename($0)
                               : die "Multi-exec command called with no basename\n";
-my @path = ("/usr/libexec/$0", split ':', $ENV{PATH});
+my @path = (split ':', $ENV{PATH});
 my $cmd = (@ARGV and $ARGV[0] !~ /^-/) ? shift @ARGV : $def_cmd;
 
-# An alias can be a shell command or a subroutine. Note that @ARGV holds
-# whatever command-line args were passed, and $0 holds the command basename.
 my %alias = (
     help   => sub {
         print "Possible commands:\n", map {"\t$_\n"} find_subcmds();
@@ -19,24 +16,24 @@ my %alias = (
 
 if (exists $alias{$cmd}) {
     if ('CODE' eq ref($alias{$cmd})) {
-        exit($alias{$cmd}->())
+        exit($alias{$cmd}->(@ARGV))
     } else {
-        exec $alias{$cmd}
+        exec $alias{$cmd}, @ARGV;
     }
 } else {
     # find the best exec candidate, even with a file extension
-    # fall back to the bare command "$base-$cmd"
+    # fall back to "$0-$cmd", which may be a relative path
     for (@path) {
         opendir(my $dh, $_) or next;
-        my @files = sort grep {/^$0-$cmd\.?/} readdir $dh;
+        my @files = sort grep {/^$base-$cmd\.?/} readdir $dh;
         closedir $dh;
         exec ("$_/$files[0]", @ARGV) if @files
     }
-    exec "$0-$cmd";
+    exec "$0-$cmd", @ARGV;
 }
 sub find_subcmds {
     (
         keys(%alias),
-        map { m|/$0-([^/]+)$| } map { glob("$_/$0-*") } @path
+        map { m|/$base-([^/]+)$| } map { glob("$_/$base-*") } @path
     )
 }
