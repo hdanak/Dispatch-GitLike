@@ -1,3 +1,0 @@
-multi-exec::
-    Rename or symlink script to your command's base name (e.g. git), and optionally add aliases or modify the search path.
-    For example, if you rename it to "dispatch", then you can call any executable "dispatch-<verb>" as "dispatch verb".
