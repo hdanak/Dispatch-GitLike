@@ -1,6 +1,6 @@
-GitLike::Dispatch
+Dispatch::GitLike
 =================
-GitLike::Dispatch is a module for creating extendible command tool-chains, in
+Dispatch::GitLike is a module for creating extendible command tool-chains, in
 a style similar to the `git` command (i.e. `git add` will dispatch `git-add`).
 The simplest usage is to symlink the `multi-exec` script to the desired
 command name, which will automatically find and dispatch the correct script.

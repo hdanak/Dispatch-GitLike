@@ -1,4 +1,4 @@
-package GitLike::Dispatch;
+package Dispatch::GitLike;
 use Modern::Perl;
 use File::Basename;
 
