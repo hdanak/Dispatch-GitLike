@@ -2,4 +2,4 @@
 use Modern::Perl;
 use Dispatch::GitLike;
 
-Dispatch::GitLike->new->run
+Dispatch::GitLike->new->run(@ARGV)
