@@ -33,9 +33,9 @@ sub run {
     my ($self, @argv) = shift;
     my $cmd = (@argv and $argv[0] !~ /^-/) ? shift(@argv) : $$self{default};
     die "Error: Could not resolve command '$$self{base} $cmd'.\n"
-            unless exists $$commands{$cmd};
-    $$self{qw[cmd argv]} = ( $cmd, \@argv );
-    exit($$commands{$cmd}->($self))
+            unless exists $$self{commands}{$cmd};
+    @$self{qw[cmd argv]} = ( $cmd, \@argv );
+    exit($$self{commands}{$cmd}->($self))
 }
 
 1

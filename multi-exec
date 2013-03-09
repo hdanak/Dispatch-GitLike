@@ -1,39 +1,46 @@
 #!/usr/bin/env perl
+package Dispatch::GitLike;
 use Modern::Perl;
 use File::Basename;
 
-my $def_cmd= 'help';
-my $base = ($0 and $0 ne '-') ? basename($0)
-                              : die "Multi-exec command called with no basename\n";
-my @path = (split ':', $ENV{PATH});
-my $cmd = (@ARGV and $ARGV[0] !~ /^-/) ? shift @ARGV : $def_cmd;
-
-my %alias = (
-    help   => sub {
-        print "Possible commands:\n", map {"\t$_\n"} find_subcmds();
-    },
-);
-
-if (exists $alias{$cmd}) {
-    if ('CODE' eq ref($alias{$cmd})) {
-        exit($alias{$cmd}->(@ARGV))
-    } else {
-        exec $alias{$cmd}, @ARGV;
-    }
-} else {
-    # find the best exec candidate, even with a file extension
-    # fall back to "$0-$cmd", which may be a relative path
-    for (@path) {
-        opendir(my $dh, $_) or next;
-        my @files = sort grep {/^$base-$cmd\.?/} readdir $dh;
-        closedir $dh;
-        exec ("$_/$files[0]", @ARGV) if @files
-    }
-    exec "$0-$cmd", @ARGV;
+sub new {
+    my ($class, %opts) = @_;
+    my @path = defined($opts{path}) ? @{$opts{path}} : split(':', $ENV{PATH});
+    my $base = $opts{base} // ( ($0 and $0 ne '-') ? basename($0)
+                           : die "Error: Cannot resolve command basename.\n" );
+    my $self = bless {
+        default  => $opts{default} // 'help',
+        commands => {
+            help   => sub {
+                my $self = shift;
+                print STDERR "Possible commands:\n",
+                                map {"\t$_\n"} keys %{$$self{commands}};
+            },
+            %{ $opts{commands} // {} },
+            map {
+                my $cmdpath = $_;
+                m|/$base-([^/]+)$| ? ( $1 => sub {
+                    my $self = shift;
+                    exec($cmdpath, @{$$self{argv}})
+                } ) : ()
+            } sort grep { -x } map { glob "$_/$base-*" } @path
+        },
+        path    => \@path,
+        base    => $base,
+    }, $class;
+    return $self;
 }
-sub find_subcmds {
-    (
-        keys(%alias),
-        map { m|/$base-([^/]+)$| } map { glob("$_/$base-*") } @path
-    )
+sub run {
+    my ($self, @argv) = shift;
+    my $cmd = (@argv and $argv[0] !~ /^-/) ? shift(@argv) : $$self{default};
+    die "Error: Could not resolve command '$$self{base} $cmd'.\n"
+            unless exists $$self{commands}{$cmd};
+    @$self{qw[cmd argv]} = ( $cmd, \@argv );
+    exit($$self{commands}{$cmd}->($self))
 }
+
+1
+;
+
+package main;
+Dispatch::GitLike->new->run(@ARGV)
