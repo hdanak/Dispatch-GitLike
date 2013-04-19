@@ -5,7 +5,7 @@ use File::Basename;
 sub new {
     my ($class, %opts) = @_;
     my @path = defined($opts{path}) ? @{$opts{path}} : split(':', $ENV{PATH});
-    my $base = $opts{base} // ( ($0 and $0 ne '-') ? basename($0)
+    my $base = $opts{basecmd} // ( ($0 and $0 ne '-') ? basename($0)
                            : die "Error: Cannot resolve command basename.\n" );
     my $self = bless {
         default  => $opts{default} // 'help',
@@ -35,6 +35,9 @@ sub run {
     die "Error: Could not resolve command '$$self{base} $cmd'.\n"
             unless exists $$self{commands}{$cmd};
     @$self{qw[cmd argv]} = ( $cmd, \@argv );
+    local @ARGV = @argv;
+    local $0 = "$self{base}-$cmd";
+    local $ENV{PATH} = $self{path};
     exit($$self{commands}{$cmd}->($self))
 }
 

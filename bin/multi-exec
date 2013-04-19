@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# PODNAME: multi-exec
 use Modern::Perl;
 use Dispatch::GitLike;
 
