@@ -43,7 +43,7 @@ sub run {
     @$self{qw[cmd argv]} = ( $cmd, \@argv );
     local @ARGV = @argv;
     local $0 = "$$self{base}-$cmd";
-    local $ENV{PATH} = $$self{path};
+    local $ENV{PATH} = join ':', @{$$self{path}};
     $$self{commands}{$cmd}->($self)
 }
 
