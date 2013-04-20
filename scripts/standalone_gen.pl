@@ -6,4 +6,4 @@ print join "\n",
     "#!/usr/bin/env perl",
     (map { `cat $_`.';' } grep { -f } split "\n", `find $project_dir/lib -name *.pm`),
     "package main;",
-    `tail -n1 $project_dir/multi-exec`;
+    `tail -n1 $project_dir/bin/multi-exec`;
