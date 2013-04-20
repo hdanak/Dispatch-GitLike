@@ -2,8 +2,8 @@ Name
 ====
 Dispatch::GitLike
 
-Summary
-=======
+Description
+===========
 Dispatch::GitLike is a module for building command tool-chains in a manner similar to `git`.
 
 Synopsis
@@ -23,12 +23,13 @@ Synopsis
     > mycmd branch subaction --key=val -o 1
     ... calls mycmd-branch-subaction --key=val -o 1 ...
 
-### As a Module
+### Or as a Module
 
     use Dispatch::GitLike;
-    Dispatch::GitLike->new->run(@ARGV)
-    # or specify custom commands and options
     Dispatch::GitLike->new(
+        mycommand => sub {
+            ...custom subcommand...
+        }
     )->run(@ARGV)
 
 Usage
