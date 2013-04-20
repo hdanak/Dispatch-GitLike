@@ -42,7 +42,7 @@ Symlink or rename the standalone `multi-exec` binary to your command's base-name
 
 Create your own Dispatch Script
 -------------------------------
-The easiest way to create your own Dispatch script is to simply copy the included multi-exec wrapper script and customize it by adding options to the `new` method. Here are the available options along with their defaults:
+The easiest way to create your own Dispatch script is to simply copy the included multi-exec wrapper script and customize it by providing options to the `new` method. Here are the available options along with their defaults:
 
 ### `new` ###
         Dispatch::GitLike->new(
@@ -58,4 +58,4 @@ The easiest way to create your own Dispatch script is to simply copy the include
             external    =>  (0|1)   // 1            # whether to search for external commands as well
         )
 
-Note that subroutines in the 'commands' hashref are called with localized @ARGV, $0, and $ENV{PATH} reflecting the conditions in which the command was called.
+Subroutines in the 'commands' hashref are called with localized @ARGV, $0, and $ENV{PATH} reflecting the conditions in which the command was called. The Dispatch::GitLike object is also passed as the first argument. Note that the executable `PATH` is searched when `new` is called, rather than during dispatch time.

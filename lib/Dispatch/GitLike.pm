@@ -38,7 +38,7 @@ sub run {
     local @ARGV = @argv;
     local $0 = "$self{base}-$cmd";
     local $ENV{PATH} = $self{path};
-    exit($$self{commands}{$cmd}->($self))
+    $$self{commands}{$cmd}->($self)
 }
 
 1
