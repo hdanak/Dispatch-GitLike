@@ -27,8 +27,10 @@ Synopsis
 
     use Dispatch::GitLike;
     Dispatch::GitLike->new(
-        mycommand => sub {
-            ...custom subcommand...
+        commands => {
+            mycmd => sub {
+                ...custom subcommand...
+            }
         }
     )->run(@ARGV)
 
@@ -46,10 +48,10 @@ The easiest way to create your own Dispatch script is to simply copy the include
 
 ### `new` ###
         Dispatch::GitLike->new(
-            path    => "..."    // $ENV{PATH},      # custom PATH to search for subcommands
-            basecmd => "..."    // basename($0),    # name to use to search for subcommands
-            default => "..."    // 'help',          # default subcommand to execute
-            commands    => {                        # extra commands to dispatch before external commands
+            path      => "..."    // $ENV{PATH},    # custom PATH to search for subcommands
+            base      => "..."    // basename($0),  # name to use to search for subcommands
+            default   => "..."    // 'help',        # default subcommand to execute
+            commands  => {                          # extra commands to dispatch before external commands
                 action => sub {
                     my ($self) = @_;
                     ...@ARGV, $0, and $ENV{PATH} locally set...

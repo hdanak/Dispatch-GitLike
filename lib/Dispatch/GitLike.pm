@@ -5,39 +5,45 @@ use File::Basename;
 sub new {
     my ($class, %opts) = @_;
     my @path = defined($opts{path}) ? @{$opts{path}} : split(':', $ENV{PATH});
-    my $base = $opts{basecmd} // ( ($0 and $0 ne '-') ? basename($0)
+    my $base = $opts{base} // ( ($0 and $0 ne '-') ? basename($0)
                            : die "Error: Cannot resolve command basename.\n" );
+    my $external = $opts{external} // 1;
     my $self = bless {
+        external => $external,
         default  => $opts{default} // 'help',
         commands => {
             help   => sub {
                 my $self = shift;
                 print STDERR "Possible commands:\n",
-                                map {"\t$_\n"} keys %{$$self{commands}};
+                                map {"\t$_\n"} sort keys %{$$self{commands}};
             },
             %{ $opts{commands} // {} },
-            map {
-                my $cmdpath = $_;
-                m|/$base-([^/]+)$| ? ( $1 => sub {
-                    my $self = shift;
-                    exec($cmdpath, @{$$self{argv}})
-                } ) : ()
-            } sort grep { -x } map { glob "$_/$base-*" } @path
+            find_external({ base => $base, path => \@path })
         },
         path    => \@path,
         base    => $base,
     }, $class;
     return $self;
 }
+sub find_external {
+    my ($base, $path) = @{$_[0]}{'base', 'path'};
+    map {
+        my $cmdpath = $_;
+        m|/$base-([^/]+)$| ? ( $1 => sub {
+            my $self = shift;
+            exec($cmdpath, @{$$self{argv}})
+        } ) : ()
+    } sort grep { -x } map { glob "$_/$base-*" } @$path
+}
 sub run {
-    my ($self, @argv) = shift;
+    my ($self, @argv) = @_;
     my $cmd = (@argv and $argv[0] !~ /^-/) ? shift(@argv) : $$self{default};
     die "Error: Could not resolve command '$$self{base} $cmd'.\n"
             unless exists $$self{commands}{$cmd};
     @$self{qw[cmd argv]} = ( $cmd, \@argv );
     local @ARGV = @argv;
-    local $0 = "$self{base}-$cmd";
-    local $ENV{PATH} = $self{path};
+    local $0 = "$$self{base}-$cmd";
+    local $ENV{PATH} = $$self{path};
     $$self{commands}{$cmd}->($self)
 }
 

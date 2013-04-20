@@ -1,6 +1,4 @@
-use strict;
-use warnings;
-
+use Modern::Perl;
 use Test::More;
 
 BEGIN {
