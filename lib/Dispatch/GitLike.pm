@@ -4,24 +4,29 @@ use File::Basename;
 
 sub new {
     my ($class, %opts) = @_;
-    my @path = defined($opts{path}) ? @{$opts{path}} : split(':', $ENV{PATH});
-    my $base = $opts{base} // ( ($0 and $0 ne '-') ? basename($0)
-                           : die "Error: Cannot resolve command basename.\n" );
+    my $path = $opts{path} // [ split ':', $ENV{PATH} ];
+    my $base = $opts{base} // (($0 and $0 ne '-') ? basename($0)
+                        : die "Error: Cannot resolve command basename.\n");
     my $external = $opts{external} // 1;
+    my $default  = $opts{default}  // 'help';
+    my $commands = {
+        help   => sub {
+            my $self = shift;
+            print STDERR "Possible commands:\n",
+                            map {"\t$_\n"} sort keys %{$$self{commands}};
+        },
+        ( map {
+            my $cmd = $opts{commands}{$_};
+            $_ => ref($cmd) ? $cmd : sub { exec($cmd, @ARGV) }
+        } keys %{$opts{commands}} ),
+        find_external({ base => $base, path => $path })
+    };
     my $self = bless {
         external => $external,
-        default  => $opts{default} // 'help',
-        commands => {
-            help   => sub {
-                my $self = shift;
-                print STDERR "Possible commands:\n",
-                                map {"\t$_\n"} sort keys %{$$self{commands}};
-            },
-            %{ $opts{commands} // {} },
-            find_external({ base => $base, path => \@path })
-        },
-        path    => \@path,
-        base    => $base,
+        default  => $default,
+        commands => $commands,
+        path     => $path,
+        base     => $base,
     }, $class;
     return $self;
 }
@@ -29,10 +34,7 @@ sub find_external {
     my ($base, $path) = @{$_[0]}{'base', 'path'};
     map {
         my $cmdpath = $_;
-        m|/$base-([^/]+)$| ? ( $1 => sub {
-            my $self = shift;
-            exec($cmdpath, @{$$self{argv}})
-        } ) : ()
+        m|/$base-([^/]+)$| ? ( $1 => sub { exec($cmdpath, @ARGV) } ) : ()
     } sort grep { -x } map { glob "$_/$base-*" } @$path
 }
 sub run {

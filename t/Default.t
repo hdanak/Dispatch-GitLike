@@ -5,12 +5,10 @@ use Dispatch::GitLike;
 
 Dispatch::GitLike->new(
     commands    => {
-        subcommand => sub {
-            is $ENV{PATH}, 'a:b:c:d';
-        }
+        subcommand => sub { pass }
     },
-    path        => ['a', 'b', 'c', 'd'],
+    default     => 'subcommand',
     external    => 0
-)->run('subcommand');
+)->run();
 
 done_testing 1
