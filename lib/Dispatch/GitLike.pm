@@ -35,7 +35,7 @@ sub find_external {
     map {
         my $cmdpath = $_;
         m|/$base-([^/]+)$| ? ( $1 => sub { exec($cmdpath, @ARGV) } ) : ()
-    } sort grep { -x } map { glob "$_/$base-*" } @$path
+    } sort grep { -x } map { glob "$_/$base-*" } ('.', @$path)
 }
 sub run {
     my ($self, @argv) = @_;
