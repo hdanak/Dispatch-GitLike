@@ -21,6 +21,24 @@ sub new {
         } keys %{$opts{commands}} ),
         find_external({ base => $base, path => $path })
     };
+    # Group subcommands
+    my %cmd_groups;
+    for (keys %$commands) {
+        my @parts = split /-+/;
+        if (@parts > 1) {
+            push @{$cmd_groups{$parts[0]}},
+                [ join('-', @parts[1..$#parts]) => $$commands{$_} ];
+            delete $$commands{$_};
+        }
+    }
+    for (keys %cmd_groups) {
+        my $subcmd = $_;
+        $$commands{$subcmd} = sub {
+            Dispatch::GitLike->new(commands => {
+                map { @$_ } @{$cmd_groups{$subcmd}}
+            })->run(@ARGV);
+        }
+    }
     my $self = bless {
         external => $external,
         default  => $default,
@@ -34,7 +52,9 @@ sub find_external {
     my ($base, $path) = @{$_[0]}{'base', 'path'};
     map {
         my $cmdpath = $_;
-        m|/$base-([^/]+)$| ? ( $1 => sub { exec($cmdpath, @ARGV) } ) : ()
+        m|/$base-([^/]+)$| ? (
+            ($1 =~ s/\.[^.]+$//r) => sub { exec($cmdpath, @ARGV) }
+        ) : ()
     } sort grep { -x } map { glob "$_/$base-*" } ('.', @$path)
 }
 sub run {
