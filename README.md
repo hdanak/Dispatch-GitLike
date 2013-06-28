@@ -10,6 +10,7 @@ Synopsis
 ========
 
 ### Quick and Dirty
+
     > ln -s mycmd `which multi-exec`
     > echo "echo 'echooo..'" > mycmd-action && chmod +x mycommand-action
     > mycmd
@@ -33,6 +34,11 @@ Synopsis
             }
         }
     )->run(@ARGV)
+
+Installation
+============
+
+    cpanm git://github.com/hdanak/Dispatch-GitLike.git
 
 Usage
 =====
