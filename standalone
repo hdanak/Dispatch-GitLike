@@ -73,4 +73,4 @@ sub run {
 1
 ;
 package main;
-exit(Dispatch::GitLike->new->run(@ARGV))
+exit Dispatch::GitLike->new->run(@ARGV) unless caller

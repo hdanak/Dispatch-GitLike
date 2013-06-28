@@ -3,4 +3,4 @@
 use Modern::Perl;
 use Dispatch::GitLike;
 
-exit(Dispatch::GitLike->new->run(@ARGV))
+exit Dispatch::GitLike->new->run(@ARGV) unless caller
